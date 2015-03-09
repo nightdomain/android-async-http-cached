@@ -15,10 +15,10 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class HttpResponseHandler extends AsyncHttpResponseHandler {
+public class ResponseHandler extends AsyncHttpResponseHandler {
 
-	private static final String TAG = HttpResponseHandler.class.getSimpleName();
-	private HttpCacheManager mCacheManager;
+	private static final String TAG = ResponseHandler.class.getSimpleName();
+	private RequestCacheManager mCacheManager;
 	private String mUrl;
 	private boolean mCache;
 
@@ -27,7 +27,7 @@ public class HttpResponseHandler extends AsyncHttpResponseHandler {
 	
 	private long mLastModified = -1L;
 	
-	public HttpResponseHandler(HttpCacheManager cacheManager, String url,
+	public ResponseHandler(RequestCacheManager cacheManager, String url,
 			boolean cache, RequestListener requestListener, int requestId) {
 		this.mCacheManager = cacheManager;
 		this.mUrl = url;
@@ -110,7 +110,7 @@ public class HttpResponseHandler extends AsyncHttpResponseHandler {
 	
 	@Override
 	public void onProgress(int bytesWritten, int totalSize) {
-		this.mRequestListener.onProgress(bytesWritten, totalSize);
+		this.mRequestListener.onProgress(bytesWritten, totalSize, mRequestId);
 	}
 
 	@Override

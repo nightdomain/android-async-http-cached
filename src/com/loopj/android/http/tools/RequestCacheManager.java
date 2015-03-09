@@ -1,12 +1,10 @@
 package com.loopj.android.http.tools;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +20,12 @@ import android.database.sqlite.SQLiteOpenHelper;
  * @author savant-pan
  * 
  */
-public class HttpCacheManager {
-	private static HttpCacheManager INSTANCE = null;
+public class RequestCacheManager {
+	private static RequestCacheManager INSTANCE = null;
 	private RequestDBHelper requestDBHelper = null;
 	private Context mContext;
 	
-	private HttpCacheManager(Context context) {
+	private RequestCacheManager(Context context) {
 		this.mContext = context;
 		this.requestDBHelper = new RequestDBHelper(context);
 	}
@@ -39,9 +37,9 @@ public class HttpCacheManager {
 	 *            Context value
 	 * @return
 	 */
-	public static HttpCacheManager getInstance(Context context) {
+	public static RequestCacheManager getInstance(Context context) {
 		if (INSTANCE == null) {
-			INSTANCE = new HttpCacheManager(context);
+			INSTANCE = new RequestCacheManager(context);
 		}
 		return INSTANCE;
 	}
@@ -172,7 +170,7 @@ public class HttpCacheManager {
 			}
 			os.flush();
 
-			HttpCacheManager.getInstance(mContext).update(url, lastModified);
+			RequestCacheManager.getInstance(mContext).update(url, lastModified);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

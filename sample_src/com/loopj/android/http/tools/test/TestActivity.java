@@ -1,6 +1,5 @@
 package com.loopj.android.http.tools.test;
 
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,22 +24,20 @@ public class TestActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		this.mRequestManager = RequestManager
 				.getInstance(getApplicationContext());
-		sample();
-	}
-
-	public void sample() {
+		
 		get();
-//		postParams();
-//		postJSONObject();
-//		postXML();
+		postParams();
+		postJSONObject();
+		postXML();
 	}
 
 	/**
 	 * get by url
 	 */
 	private void get() {
-		this.mRequestManager.get("http://app.shafa.com/api/push/download/52a093cf3bf55d361e000477?response-content-type=application%2fvnd.android.package-archive",
-				null,requestListener,true, REQUEST_GET_ID);
+		this.mRequestManager
+				.get("http://app.shafa.com/api/push/download/52a093cf3bf55d361e000477?response-content-type=application%2fvnd.android.package-archive",
+						null, requestListener, true, REQUEST_GET_ID);
 	}
 
 	/**
@@ -84,13 +81,12 @@ public class TestActivity extends Activity {
 	private RequestListener requestListener = new RequestListener() {
 		@Override
 		public void onStart() {
-			// showDialog();
+
 		}
 
 		@Override
 		public void onCompleted(int statusCode, byte[] data,
 				String description, int actionId) {
-			// dismissDialog();
 			try {
 				System.out.println(new String(data, "UTF-8"));
 			} catch (Exception e) {
@@ -112,8 +108,8 @@ public class TestActivity extends Activity {
 		}
 
 		@Override
-		public void onProgress(int bytesWritten, int totalSize) {
-			System.out.println(bytesWritten+"/"+totalSize);
+		public void onProgress(int bytesWritten, int totalSize, int actionId) {
+			System.out.println(bytesWritten + "/" + totalSize);
 		}
 	};
 

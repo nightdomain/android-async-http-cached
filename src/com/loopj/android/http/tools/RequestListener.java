@@ -26,8 +26,9 @@ public interface RequestListener {
      *
      * @param bytesWritten offset from start of file
      * @param totalSize    total size of file
+     * @param actionId    request id
      */
-	public void onProgress(int bytesWritten, int totalSize);
+	public void onProgress(int bytesWritten, int totalSize, int actionId);
 
 	/**
 	 * callback when Request end

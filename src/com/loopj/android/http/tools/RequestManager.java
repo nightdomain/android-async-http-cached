@@ -29,14 +29,14 @@ import com.loopj.android.http.RequestParams;
  */
 public class RequestManager {
 	private final AsyncHttpClient mAsyncHttpClient;
-	private final HttpCacheManager mCacheManager;
+	private final RequestCacheManager mCacheManager;
 	private Context mContext;
 
 	private static volatile RequestManager INSTANCE = null;
 
 	protected RequestManager(Context context) {
 		this.mContext = context;
-		this.mCacheManager = HttpCacheManager.getInstance(context);
+		this.mCacheManager = RequestCacheManager.getInstance(context);
 		this.mAsyncHttpClient = new AsyncHttpClient();
 	}
 
@@ -62,7 +62,7 @@ public class RequestManager {
 			for (String f : fl) {
 				context.deleteFile(f);
 			}
-			HttpCacheManager.getInstance(context).deleteAll();
+			RequestCacheManager.getInstance(context).deleteAll();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -83,7 +83,7 @@ public class RequestManager {
 	public void post(String url, RequestParams params,
 			RequestListener requestListener, int actionId) {
 		mAsyncHttpClient.post(this.mContext, url, params,
-				new HttpResponseHandler(this.mCacheManager, url, false,
+				new ResponseHandler(this.mCacheManager, url, false,
 						requestListener, actionId));
 	}
 
@@ -99,7 +99,7 @@ public class RequestManager {
 			RequestListener requestListener, int actionId) {
 		mAsyncHttpClient.post(this.mContext, url,
 				rpcToEntity(params.toString(), "application/json"),
-				"application/json", new HttpResponseHandler(this.mCacheManager,
+				"application/json", new ResponseHandler(this.mCacheManager,
 						url, false, requestListener, actionId));
 	}
 
@@ -116,7 +116,7 @@ public class RequestManager {
 			RequestListener requestListener, int actionId) {
 		mAsyncHttpClient.post(this.mContext, url, headers,
 				rpcToEntity(params.toString(), "application/json"),
-				"application/json", new HttpResponseHandler(this.mCacheManager,
+				"application/json", new ResponseHandler(this.mCacheManager,
 						url, false, requestListener, actionId));
 	}
 
@@ -132,7 +132,7 @@ public class RequestManager {
 			RequestListener requestListener, int actionId) {
 		mAsyncHttpClient.post(this.mContext, url,
 				rpcToEntity(params, "application/xml"), "application/xml",
-				new HttpResponseHandler(this.mCacheManager, url, false,
+				new ResponseHandler(this.mCacheManager, url, false,
 						requestListener, actionId));
 	}
 
@@ -149,7 +149,7 @@ public class RequestManager {
 			RequestListener requestListener, int actionId) {
 		mAsyncHttpClient.post(this.mContext, url, headers,
 				rpcToEntity(params, "application/xml"), "application/xml",
-				new HttpResponseHandler(this.mCacheManager, url, false,
+				new ResponseHandler(this.mCacheManager, url, false,
 						requestListener, actionId));
 	}
 
@@ -198,72 +198,92 @@ public class RequestManager {
 			final RequestListener requestListener, final boolean isCache,
 			final int actionId) {
 		if (!hasNetwork(this.mContext)) {
-			new AsyncTask<Void, Integer, byte[]>() {
-				protected void onPreExecute() {
-					requestListener.onStart();
-				}
-
-				@Override
-				protected byte[] doInBackground(Void... params) {
-					if (!mCacheManager.hasCache(url)) {
-						return null;
-					}
-					return loadCacheResource();
-				}
-
-				/**
-				 * 读缓存
-				 * 
-				 * @param context
-				 * @param url
-				 */
-				public byte[] loadCacheResource() {
-					FileInputStream ins = null;
-					try {
-						ins = mCacheManager.getInputStream(url);
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						byte[] bytes = new byte[4096];
-						int len = 0;
-						int count = 0;
-						int contentLength = ins.available();
-
-						while ((len = ins.read(bytes)) > 0) {
-							bos.write(bytes, 0, len);
-							count += len;
-							publishProgress(count, contentLength);
-						}
-						bos.flush();
-						return bos.toByteArray();
-					} catch (Exception e) {
-						e.printStackTrace();
-						return null;
-					} finally {
-						if (ins != null) {
-							try {
-								ins.close();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-
-				protected void onProgressUpdate(Integer... values) {
-					requestListener.onProgress(values[0], values[1]);
-				}
-
-				protected void onPostExecute(byte[] result) {
-					boolean flag = (result != null);
-					requestListener.onCompleted((flag ? RequestListener.OK
-							: RequestListener.ERR), result,
-							flag ? "load cache ok" : "load cache error",
-							actionId);
-				}
-			}.execute();
+			new CacheLoadTask(this.mCacheManager, url, requestListener,
+					actionId).execute();
 		} else {
 			mAsyncHttpClient.get(this.mContext, url, params,
-					new HttpResponseHandler(this.mCacheManager, url, isCache,
+					new ResponseHandler(this.mCacheManager, url, isCache,
 							requestListener, actionId));
+		}
+	}
+
+	/**
+	 * cache load task
+	 */
+	private class CacheLoadTask extends AsyncTask<Void, Integer, byte[]> {
+		private RequestListener mRequestListener;
+		private int mRequestId;
+		private RequestCacheManager mCacheManager;
+		private String mUrl;
+
+		public CacheLoadTask(RequestCacheManager cacheManager, String url,
+				RequestListener requestListener, int requestId) {
+			this.mCacheManager = cacheManager;
+			this.mUrl = url;
+
+			this.mRequestListener = requestListener;
+			this.mRequestId = requestId;
+		}
+
+		protected void onPreExecute() {
+			mRequestListener.onStart();
+		}
+
+		@Override
+		protected byte[] doInBackground(Void... params) {
+			if (!mCacheManager.hasCache(mUrl)) {
+				return null;
+			}
+			
+			return loadCacheResource();
+		}
+
+		/**
+		 * 读缓存
+		 * 
+		 * @param context
+		 * @param url
+		 */
+		public byte[] loadCacheResource() {
+			FileInputStream ins = null;
+			try {
+				ins = mCacheManager.getInputStream(mUrl);
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				byte[] bytes = new byte[4096];
+				int len = 0;
+				int count = 0;
+				int contentLength = ins.available();
+
+				while ((len = ins.read(bytes)) > 0) {
+					bos.write(bytes, 0, len);
+					count += len;
+					publishProgress(count, contentLength);
+				}
+				bos.flush();
+				return bos.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			} finally {
+				if (ins != null) {
+					try {
+						ins.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+
+		protected void onProgressUpdate(Integer... values) {
+			mRequestListener.onProgress(values[0], values[1], mRequestId);
+		}
+
+		protected void onPostExecute(byte[] result) {
+			boolean flag = (result != null);
+			mRequestListener.onCompleted((flag ? RequestListener.OK
+					: RequestListener.ERR), result, flag ? "load cache ok"
+					: "load cache error", mRequestId);
 		}
 	}
 
