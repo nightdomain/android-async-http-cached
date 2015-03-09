@@ -36,7 +36,6 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.RedirectHandler;
@@ -340,16 +339,6 @@ public class AsyncHttpClient {
      */
     public HttpContext getHttpContext() {
         return this.httpContext;
-    }
-
-    /**
-     * Sets an optional CookieStore to use when making requests
-     *
-     * @param cookieStore The CookieStore implementation to use, usually an instance of {@link
-     *                    PersistentCookieStore}
-     */
-    public void setCookieStore(CookieStore cookieStore) {
-        httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
     }
 
     /**
