@@ -14,7 +14,12 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
+/**
+ * ResponseHandler
+ * 
+ * @author savant-pan
+ * 
+ */
 public class ResponseHandler extends AsyncHttpResponseHandler {
 
 	private static final String TAG = ResponseHandler.class.getSimpleName();
@@ -72,10 +77,7 @@ public class ResponseHandler extends AsyncHttpResponseHandler {
 	}
 	
 	/**
-	 * 读缓存
-	 * 
-	 * @param context
-	 * @param url
+	 * try to read from cache
 	 */
 	public byte[] loadCacheResource() {
 		FileInputStream ins = null;
@@ -159,12 +161,9 @@ public class ResponseHandler extends AsyncHttpResponseHandler {
 		}
 	}
 
-	   /**
-     * Attempts to encode response bytes as string of set encoding
+	 /**
      *
-     * @param charset     charset to create string with
      * @param stringBytes response bytes
-     * @return String of set encoding or null
      */
     public static String getResponseString(byte[] stringBytes, String charset) {
         try {

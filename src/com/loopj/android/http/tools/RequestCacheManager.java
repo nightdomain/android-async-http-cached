@@ -22,12 +22,12 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class RequestCacheManager {
 	private static RequestCacheManager INSTANCE = null;
-	private RequestDBHelper requestDBHelper = null;
+	private RequestDBHelper mRequestDBHelper = null;
 	private Context mContext;
 	
 	private RequestCacheManager(Context context) {
 		this.mContext = context;
-		this.requestDBHelper = new RequestDBHelper(context);
+		this.mRequestDBHelper = new RequestDBHelper(context);
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class RequestCacheManager {
 	 * @param item
 	 */
 	public void update(String url, long lastModified) {
-		SQLiteDatabase db = requestDBHelper.getWritableDatabase();
+		SQLiteDatabase db = mRequestDBHelper.getWritableDatabase();
 		if (!find(url)) { // add if not exist
 			db.execSQL("insert into request_cache(url, lastmodified) values(?,?)",
 					new Object[] { url, String.valueOf(lastModified) });
@@ -67,7 +67,7 @@ public class RequestCacheManager {
 	 * @return
 	 */
 	public long getLastModified(String url) {
-		SQLiteDatabase db = requestDBHelper.getReadableDatabase();
+		SQLiteDatabase db = mRequestDBHelper.getReadableDatabase();
 		Cursor cursor = null;
 		try {
 			long ret = 0l;
@@ -94,7 +94,7 @@ public class RequestCacheManager {
 	 * @return
 	 */
 	private boolean find(String url) {
-		SQLiteDatabase db = requestDBHelper.getReadableDatabase();
+		SQLiteDatabase db = mRequestDBHelper.getReadableDatabase();
 		Cursor cursor = null;
 		try {
 			boolean flag = false;
@@ -119,7 +119,7 @@ public class RequestCacheManager {
 	public void deleteAll() {
 		List<String> all = getUrls();
 		for (String url : all) {
-			SQLiteDatabase database = requestDBHelper.getWritableDatabase();
+			SQLiteDatabase database = mRequestDBHelper.getWritableDatabase();
 			database.execSQL("delete from request_cache where url=?", new Object[] { url });
 		}
 	}
@@ -131,7 +131,7 @@ public class RequestCacheManager {
 	 */
 	private List<String> getUrls() {
 		List<String> ret = new ArrayList<String>();
-		SQLiteDatabase db = requestDBHelper.getReadableDatabase();
+		SQLiteDatabase db = mRequestDBHelper.getReadableDatabase();
 		Cursor cursor = null;
 		try {
 			cursor = db.rawQuery("select * from request_cache", null);
