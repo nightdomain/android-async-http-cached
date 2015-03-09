@@ -1,4 +1,4 @@
-package com.allthelucky.http;
+package com.loopj.android.http.tools;
 
 /**
  * Request Listener for AsyncHttpResponseHandler
@@ -20,6 +20,14 @@ public interface RequestListener {
 	 * callback when Request start
 	 */
 	void onStart();
+	
+    /**
+     * Fired when the request progress, override to handle in your own code
+     *
+     * @param bytesWritten offset from start of file
+     * @param totalSize    total size of file
+     */
+	public void onProgress(int bytesWritten, int totalSize);
 
 	/**
 	 * callback when Request end
@@ -33,5 +41,5 @@ public interface RequestListener {
 	 * @param actionId
 	 *            request identifier
 	 */
-	void onCompleted(int statusCode, byte[] data, long lastModified, String description, int actionId);
+	void onCompleted(int statusCode, byte[] data, String description, int actionId);
 }

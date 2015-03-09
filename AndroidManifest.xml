@@ -5,7 +5,7 @@
 
     <application  android:label="http">
         <activity
-            android:name="framework.sample.TestActivity"
+            android:name="com.loopj.android.http.tools.test.TestActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="http"
             android:screenOrientation="portrait"
