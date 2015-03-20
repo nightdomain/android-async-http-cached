@@ -1,7 +1,7 @@
 android-async-http with response cached.
 -------------------
 
-基于Android Asynchronous HTTP Library (https://github.com/loopj/android-async-http)实现。  
+基于Android Asynchronous HTTP Library <https://github.com/loopj/android-async-http>实现。  
 1.增加响应数据本地缓存功能。  
 2.便于JSON-RPC,XML-RPC方式调用。  
 
